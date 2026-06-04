@@ -1,0 +1,10 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+data/raw/*.log
+data/raw/spread_samples_dry_run.csv
+data/raw/spread_sampler*.out
+data/raw/spread_sampler*.err
+data/raw/spread_sampler.pid

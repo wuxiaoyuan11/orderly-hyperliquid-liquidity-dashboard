@@ -1,0 +1,3 @@
+exchange,sample_window_start,sample_window_end,sample_window_hours,total_rows,successful_samples,error_rows,success_rate
+Hyperliquid,2026-06-01T12:17:22.758071+00:00,2026-06-04T12:17:04.385572+00:00,71.99489652805556,3988,3988,0,1.0
+Orderly,2026-06-01T12:17:22.758071+00:00,2026-06-04T12:17:04.385572+00:00,71.99489652805556,4002,4002,0,1.0
