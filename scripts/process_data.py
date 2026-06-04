@@ -12,9 +12,7 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
-TMP_SPREAD_SAMPLES = Path("/private/tmp/orderly-spread-sampler/spread_samples_1m.csv")
 SPREAD_WINDOW_HOURS = 72
-FINAL_SPREAD_WINDOW = RAW_DIR / "spread_samples_20260605_0000_to_20260608_0000_shanghai.csv"
 
 
 def parse_iso(value: str) -> datetime:
@@ -111,10 +109,6 @@ def normalize_funding_rows(rows: list[dict[str, str]], venue: str, symbol_key: s
 
 
 def choose_spread_files() -> list[Path]:
-    if FINAL_SPREAD_WINDOW.exists():
-        return [FINAL_SPREAD_WINDOW]
-    if TMP_SPREAD_SAMPLES.exists():
-        return [TMP_SPREAD_SAMPLES]
     if (RAW_DIR / "spread_samples_1m_live.csv").exists():
         return [RAW_DIR / "spread_samples_1m_live.csv"]
     if (RAW_DIR / "spread_samples_1m.csv").exists():

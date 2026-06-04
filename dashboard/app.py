@@ -488,7 +488,7 @@ st.caption(
 
 with st.sidebar:
     st.header("Data")
-    st.caption("Dashboard reads committed processed CSV files. Refresh data locally with scripts/process_data.py, then redeploy through GitHub.")
+    st.caption("Dashboard reads the processed CSV files included with this project.")
 
 tabs = st.tabs(["Overview", "Market Quality", "Volume", "Funding", "Top-of-book spread", "Methodology"])
 
@@ -909,7 +909,7 @@ with tabs[5]:
         **Time windows**
 
         - Volume and funding use the trailing 14-day window ending on **2026-06-01**, the case assignment date.
-        - Top-of-book spread uses the latest **72 hours** of 1-minute live snapshots.
+        - Top-of-book spread uses 1-minute live snapshots from **2026-06-01 11:49 UTC** to **2026-06-04 11:49 UTC**.
         - Spread statistics include successful snapshots only.
 
         **Volume**
