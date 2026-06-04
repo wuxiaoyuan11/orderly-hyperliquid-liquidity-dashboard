@@ -4,7 +4,9 @@ __pycache__/
 *.pyc
 .streamlit/secrets.toml
 data/raw/*.log
+data/raw/
 data/raw/spread_samples_dry_run.csv
 data/raw/spread_sampler*.out
 data/raw/spread_sampler*.err
 data/raw/spread_sampler.pid
+com.codex.*.plist
