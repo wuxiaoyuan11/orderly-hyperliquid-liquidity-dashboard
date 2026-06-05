@@ -1,21 +1,24 @@
-# Orderly vs Hyperliquid ETH Perp Liquidity Dashboard
+# Orderly vs Hyperliquid ETH Perp Liquidity Case
 
-This project compares ETH perpetual market quality on Orderly and Hyperliquid using volume, funding, and top-of-book spread data.
+This repository is a case-task dashboard comparing ETH perpetual market quality on **Orderly** and **Hyperliquid**. The analysis focuses on three requested liquidity dimensions: **volume**, **funding**, and **top-of-book spread**.
 
-## Dashboard
+## Case Objective
 
-Run locally:
+The goal is to evaluate where each venue appears stronger from available public market data:
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python -m streamlit run dashboard/app.py
-```
+- **Activity scale:** which venue has more ETH perp trading activity?
+- **Carry pressure:** how persistent and volatile is funding?
+- **Execution friction:** which venue has tighter top-of-book quotes for small taker orders?
+- **Tail behavior:** how often do quoted spreads widen beyond normal conditions?
 
-The dashboard reads the processed CSV files in `data/processed/`.
+## Key Findings
 
-## Analysis Window
+- **Hyperliquid leads on activity scale.** It generated about **$10.64B** of 14-day ETH perp notional volume versus about **$249.36M** on Orderly.
+- **Orderly leads on typical sampled top-of-book tightness.** In the Jun 1-4 spread sample, Orderly's median top-of-book spread was about **0.053 bps**, versus about **0.531 bps** on Hyperliquid.
+- **Funding was positive on both venues.** Orderly showed steadier positive carry pressure, while Hyperliquid funding was more variable.
+- **The liquidity profile is mixed.** Hyperliquid has stronger flow scale, while Orderly appears competitive on sampled small-order execution quality.
+
+## Data Windows
 
 - Historical snapshot date: **2026-06-01**
 - Volume and funding window: trailing 14 days ending on **2026-06-01**
@@ -23,7 +26,7 @@ The dashboard reads the processed CSV files in `data/processed/`.
 
 Volume and funding use historical API data. Spread uses a live sampled top-of-book window because comparable historical best bid/ask snapshots were not available through the same public data path.
 
-## Metrics
+## Methodology
 
 ### Volume
 
@@ -44,7 +47,7 @@ Funding is annualized so venues with different funding intervals can be compared
 
 Funding is interpreted as directional pressure and carry stability, not as a direct liquidity-depth ranking.
 
-### Top-of-book spread
+### Top-of-book Spread
 
 Top-of-book spread measures the immediate cost of crossing the best bid and best ask:
 
@@ -55,24 +58,39 @@ spread_bps = (best_ask - best_bid) / mid_price * 10000
 
 Lower spread indicates lower immediate execution friction for small taker orders. It does not prove full order-book depth or large-order slippage.
 
-## Analysis Framework
+### Spread-Widening Events
 
-The dashboard separates liquidity into complementary market-quality dimensions:
+Spread-widening events use a venue-specific **median + 3 x scaled MAD** threshold:
 
-- **Activity scale:** notional volume and participation.
-- **Carry pressure:** funding direction, magnitude, and stability.
-- **Execution friction:** median and percentile top-of-book spread.
-- **Tail behavior:** spread-widening events and p99 spread behavior.
+```text
+threshold = median(spread) + 3 * 1.4826 * MAD(spread)
+```
 
-Spread-widening events use a venue-specific **median + 3 x scaled MAD** threshold. This robust threshold is used because spread data is spike-heavy and non-normal; median and MAD are less distorted by extreme values than mean and standard deviation.
+MAD means median absolute deviation. This robust threshold is used because spread data is spike-heavy and non-normal; median and MAD are less distorted by extreme values than mean and standard deviation.
 
-## Key Read
+## Dashboard Structure
 
-Hyperliquid leads on historical activity scale, with much higher 14-day ETH perp notional volume. Orderly leads on typical sampled top-of-book tightness, with materially lower median spread in the sampled window. Funding was positive on both venues, with Orderly showing steadier positive carry pressure.
+The Streamlit dashboard is organized around:
 
-The overall liquidity profile is mixed: Hyperliquid has stronger flow scale, while Orderly appears competitive on sampled small-order execution quality.
+- **Overview:** headline read on activity, spread tightness, and funding stability.
+- **Market Quality:** side-by-side diagnostic checks by liquidity dimension.
+- **Volume:** historical activity and cumulative volume.
+- **Funding:** annualized funding and daily cumulative funding.
+- **Top-of-book Spread:** spread time series, widening events, percentiles, and execution-cost read.
+- **Methodology:** data windows, metric definitions, assumptions, and limitations.
 
-## Project Structure
+## Run Locally
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m streamlit run dashboard/app.py
+```
+
+The dashboard reads the processed CSV files in `data/processed/`.
+
+## Repository Structure
 
 ```text
 dashboard/app.py          Streamlit dashboard
@@ -81,3 +99,7 @@ report/conclusion.md      Written conclusion
 scripts/                  Data collection and processing scripts
 requirements.txt          Python dependencies
 ```
+
+## Analytical Limitation
+
+This case directly measures volume, funding, and sampled top-of-book spread. It does not measure full order-book depth or simulated price impact for larger orders. A deeper liquidity assessment would require historical order-book depth and slippage analysis for representative taker sizes.

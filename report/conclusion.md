@@ -1,6 +1,5 @@
 # Orderly vs Hyperliquid ETH Perp Liquidity Comparison
 
-**Status:** updated conclusion based on finalized Jun 1-4 72-hour spread sample  
 **Historical snapshot:** June 1, 2026  
 **Volume & funding window:** trailing 14 days ending June 1, 2026  
 **Spread sample:** 72 hours of 1-minute top-of-book snapshots from June 1, 2026 11:49 UTC to June 4, 2026 11:49 UTC
@@ -33,6 +32,6 @@ Spread-widening events are defined using a venue-specific **median + 3 x scaled 
 
 The most compelling Orderly angle is not that it has more ETH perp activity than Hyperliquid; it does not. The stronger message is that Orderly appears competitive on **market quality at the top of book**, with very tight typical quoted spreads during the Jun 1-4 sampled period. For a liquidity/product narrative, this suggests Orderly can position itself around efficient small-order execution quality while continuing to grow volume and broader market participation.
 
-## Limitations and Next Step
+## Limitations and Analytical Extension
 
 Volume and funding are historical 14-day metrics anchored to the case assignment date. Spread is based on the finalized Jun 1-4 72-hour live 1-minute sample because comparable public historical top-of-book data was not available through the same collection path. Historical spread backfills would require historical best bid/ask or order-book snapshots. The next analytical extension would be simulated price impact for representative ETH perp taker order sizes such as **USD 50k**, **USD 100k**, and **USD 500k**, to test whether Orderly's tight top-of-book quote scales into deeper executable liquidity.
