@@ -2,6 +2,8 @@
 
 This repository is a case-task dashboard comparing ETH perpetual market quality on **Orderly** and **Hyperliquid**. The analysis focuses on three requested liquidity dimensions: **volume**, **funding**, and **top-of-book spread**.
 
+**Dashboard:** https://orderly-hyperliquid-liquidity.streamlit.app
+
 ## Case Objective
 
 The goal is to evaluate where each venue appears stronger from available public market data:
