@@ -12,7 +12,6 @@ PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
 ANALYSIS_SNAPSHOT = "2026-06-01"
 HISTORICAL_WINDOW = "Trailing 14 days ending on 2026-06-01"
-SPREAD_WINDOW = "72-hour 1-minute top-of-book sample: Jun 1, 2026 11:49 UTC to Jun 4, 2026 11:49 UTC"
 
 
 st.set_page_config(
@@ -479,6 +478,18 @@ spread_deep_stats["share_under_0_6_bps"] = spread.groupby("exchange")["spread_bp
     lambda series: (series <= 0.6).mean()
 )
 
+spread_start = spread["timestamp"].min()
+spread_end = spread["timestamp"].max()
+spread_hours = (spread_end - spread_start).total_seconds() / 3600
+spread_window_exact = f"{spread_start:%b %-d, %Y %H:%M UTC} to {spread_end:%b %-d, %Y %H:%M UTC}"
+SPREAD_WINDOW = f"{spread_hours:.1f}-hour 1-minute top-of-book sample: {spread_window_exact}"
+expected_minute_samples = max(1, round(spread_hours * 60))
+spread_quality_display = spread_quality.copy()
+spread_quality_display["expected_minute_samples"] = expected_minute_samples
+spread_quality_display["minute_coverage"] = (
+    spread_quality_display["successful_samples"] / expected_minute_samples
+)
+
 
 st.title("Orderly vs Hyperliquid ETH Perp Liquidity")
 st.caption(
@@ -523,7 +534,7 @@ with tabs[0]:
         winner_bar_card(
             "Quoted execution cost",
             "Orderly leads",
-            f"{spread_reduction:.1f}% lower median spread in the Jun 1-4 sample; lower is better.",
+            f"{spread_reduction:.1f}% lower median spread in the 72.0h sample; lower is better.",
             format_bps(orderly["median_spread_bps"]),
             format_bps(hyper["median_spread_bps"]),
             orderly["median_spread_bps"] / spread_max * 100,
@@ -541,7 +552,7 @@ with tabs[0]:
         )
 
     takeaway(
-        "Hyperliquid leads on historical activity, while Orderly looks stronger on Jun 1-4 sampled top-of-book "
+        "Hyperliquid leads on historical activity, while Orderly looks stronger on the 72.0h sampled top-of-book "
         "tightness. Funding is positive on both venues, with Orderly more consistently positive."
     )
 
@@ -554,7 +565,7 @@ with tabs[0]:
         </div>
         <div class="score-row">
             <div class="score-title">Orderly is the sampled top-of-book tightness leader</div>
-            <div class="score-body">In the Jun 1-4 72-hour sample, median top-of-book spread was <strong>{format_bps(orderly['median_spread_bps'])}</strong> on Orderly versus <strong>{format_bps(hyper['median_spread_bps'])}</strong> on Hyperliquid. This suggests lower sampled small-order taker friction on Orderly, subject to the spread sampling caveat.</div>
+            <div class="score-body">In the 72.0h sample from {spread_window_exact}, median top-of-book spread was <strong>{format_bps(orderly['median_spread_bps'])}</strong> on Orderly versus <strong>{format_bps(hyper['median_spread_bps'])}</strong> on Hyperliquid. This suggests lower sampled small-order taker friction on Orderly, subject to the spread sampling caveat.</div>
         </div>
         <div class="score-row">
             <div class="score-title">Funding shows persistent positive ETH long-side pressure</div>
@@ -582,7 +593,7 @@ with tabs[0]:
         ].map(format_pct)
         diagnostic["p90_spread_bps"] = diagnostic["p90_spread_bps"].map(format_bps)
         st.dataframe(diagnostic, use_container_width=True, hide_index=True)
-        st.dataframe(spread_quality, use_container_width=True, hide_index=True)
+        st.dataframe(spread_quality_display, use_container_width=True, hide_index=True)
 
 
 with tabs[1]:
@@ -598,7 +609,7 @@ with tabs[1]:
 
     takeaway(
         "The liquidity picture is mixed: Hyperliquid has stronger market activity, while Orderly has "
-        "better Jun 1-4 sampled top-of-book tightness. The diagnostic checks below test whether those advantages "
+        "better 72.0h sampled top-of-book tightness. The diagnostic checks below test whether those advantages "
         "are broad-based or fragile."
     )
 
@@ -622,7 +633,7 @@ with tabs[1]:
         "Funding is venue-specific but market-driven. Hyperliquid funding moved more, while Orderly funding was steadier and more persistently positive.",
     )
     comparison_row(
-        "4. Typical execution friction: Jun 1-4 median top-of-book spread",
+        "4. Typical execution friction: 72.0h median top-of-book spread",
         format_bps(o_spread["median"]),
         format_bps(h_spread["median"]),
         "Orderly has the tighter sampled top-of-book quote, which is favorable for small taker orders.",
@@ -742,11 +753,8 @@ with tabs[3]:
 
 with tabs[4]:
     st.subheader("Top-of-book Spread")
-    st.caption("Question answered: what was small-order execution friction during the Jun 1-4, 2026 72-hour top-of-book sample?")
+    st.caption(f"Question answered: what was small-order execution friction during the 72.0h top-of-book sample from {spread_window_exact}?")
 
-    spread_start = spread["timestamp"].min()
-    spread_end = spread["timestamp"].max()
-    spread_hours = (spread_end - spread_start).total_seconds() / 3600
     s1, s2, s3 = st.columns(3)
     with s1:
         insight_card("Orderly Median Spread", format_bps(orderly["median_spread_bps"]), "Tighter best bid/ask during the live sample.")
@@ -755,7 +763,7 @@ with tabs[4]:
     with s3:
         insight_card("Orderly Median Advantage", f"{spread_reduction:.1f}% lower", "Lower spread implies lower small-order taker friction.")
 
-    takeaway("Orderly's Jun 1-4 sampled top-of-book was materially tighter on a typical basis, but this should not be overstated as full-depth liquidity or large-order slippage.")
+    takeaway("Orderly's 72.0h sampled top-of-book was materially tighter on a typical basis, but this should not be overstated as full-depth liquidity or large-order slippage.")
 
     fig_spread = px.line(
         spread,
@@ -763,7 +771,7 @@ with tabs[4]:
         y="spread_bps",
         color="exchange",
         labels={"timestamp": "Timestamp", "spread_bps": "Spread (bps)", "exchange": "Exchange"},
-        title="Top-of-book spread over Jun 1-4, 2026 sampled window",
+        title=f"Top-of-book spread over 72.0h sampled window ({spread_start:%b %-d} to {spread_end:%b %-d}, 2026 UTC)",
     )
     st.plotly_chart(apply_chart_style(fig_spread), use_container_width=True)
 
@@ -774,7 +782,7 @@ with tabs[4]:
 
     st.markdown("**Spike Duration Summary**")
     scope_note(
-        "Widening events use a robust threshold: median + 3 x scaled MAD for each venue's Jun 1-4 spread distribution. MAD means median absolute deviation; scaled MAD multiplies MAD by 1.4826 so it is comparable to standard deviation under a roughly normal distribution. This threshold is preferred over mean + 3 standard deviations because spread data is spike-heavy and non-normal, so mean and standard deviation can be distorted by extreme values."
+        "Widening events use a robust threshold: median + 3 x scaled MAD for each venue's 72.0h spread distribution. MAD means median absolute deviation; scaled MAD multiplies MAD by 1.4826 so it is comparable to standard deviation under a roughly normal distribution. This threshold is preferred over mean + 3 standard deviations because spread data is spike-heavy and non-normal, so mean and standard deviation can be distorted by extreme values."
     )
     method_thresholds = spread_thresholds(spread, "scaled_mad")
     method_events = build_spread_events(spread, method_thresholds)
@@ -815,7 +823,7 @@ with tabs[4]:
         color="Exchange",
         barmode="group",
         text=spread_percentiles["Spread (bps)"].map(format_bps),
-        title="Jun 1-4, 2026 spread percentiles",
+        title=f"Spread percentiles over 72.0h sample ({spread_start:%b %-d} to {spread_end:%b %-d}, 2026 UTC)",
     )
     fig_percentiles.update_traces(textposition="outside", cliponaxis=False)
     st.plotly_chart(apply_chart_style(fig_percentiles), use_container_width=True)
@@ -887,14 +895,14 @@ with tabs[4]:
         q1, q2, q3 = st.columns(3)
         sample_hours = spread_quality["sample_window_hours"].max()
         total_success = int(spread_quality["successful_samples"].sum())
-        avg_success_rate = spread_quality["success_rate"].mean()
+        avg_minute_coverage = spread_quality_display["minute_coverage"].mean()
         with q1:
             insight_card("Sample Window", f"{sample_hours:.1f}h", f"{spread_start:%Y-%m-%d %H:%M UTC} to {spread_end:%Y-%m-%d %H:%M UTC}.")
         with q2:
             insight_card("Successful Samples", f"{total_success:,}", "Successful top-of-book observations across both venues.")
         with q3:
-            insight_card("Average Success Rate", format_pct(avg_success_rate * 100), "Failed API calls are logged and excluded from spread stats.")
-        st.dataframe(spread_quality, use_container_width=True, hide_index=True)
+            insight_card("Avg Minute Coverage", format_pct(avg_minute_coverage * 100), "Observed snapshots divided by expected 1-minute slots; missing minutes are excluded from spread stats.")
+        st.dataframe(spread_quality_display, use_container_width=True, hide_index=True)
 
 
 with tabs[5]:
@@ -909,8 +917,8 @@ with tabs[5]:
         **Time windows**
 
         - Volume and funding use the trailing 14-day window ending on **2026-06-01**, the case assignment date.
-        - Top-of-book spread uses 1-minute live snapshots from **2026-06-01 11:49 UTC** to **2026-06-04 11:49 UTC**.
-        - Spread statistics include successful snapshots only.
+        - Top-of-book spread uses 1-minute live snapshots from **2026-06-01 12:17 UTC** to **2026-06-04 12:17 UTC**.
+        - Spread statistics include observed snapshots only; missing minute slots are excluded.
 
         **Volume**
 
@@ -943,9 +951,10 @@ with tabs[5]:
 
         **Limitation and next step**
 
-        This case directly measures volume, funding, and Jun 1-4 sampled top-of-book spread. It does not yet
-        measure full order book depth or simulated slippage for larger orders. The natural next extension would
-        be price-impact analysis for representative ETH perp taker order sizes such as USD 50k, USD 100k,
-        and USD 500k.
+        This case directly measures volume, funding, and the 72.0h sampled top-of-book spread. It does not
+        measure full order book depth or simulated slippage for larger orders because the processed spread
+        dataset contains best bid/ask observations rather than full order-book levels. A deeper liquidity
+        assessment would require 0.1% and 0.5% depth plus price-impact analysis for representative ETH perp
+        taker order sizes such as USD 50k, USD 100k, and USD 500k.
         """
     )

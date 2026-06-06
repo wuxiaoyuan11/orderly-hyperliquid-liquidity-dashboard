@@ -16,7 +16,7 @@ The goal is to evaluate where each venue appears stronger from available public 
 ## Key Findings
 
 - **Hyperliquid leads on activity scale.** It generated about **$10.64B** of 14-day ETH perp notional volume versus about **$249.36M** on Orderly.
-- **Orderly leads on typical sampled top-of-book tightness.** In the Jun 1-4 spread sample, Orderly's median top-of-book spread was about **0.053 bps**, versus about **0.531 bps** on Hyperliquid.
+- **Orderly leads on typical sampled top-of-book tightness.** In the 72.0-hour spread sample from **2026-06-01 12:17 UTC** to **2026-06-04 12:17 UTC**, Orderly's median top-of-book spread was about **0.053 bps**, versus about **0.531 bps** on Hyperliquid.
 - **Funding was positive on both venues.** Orderly showed steadier positive carry pressure, while Hyperliquid funding was more variable.
 - **The liquidity profile is mixed.** Hyperliquid has stronger flow scale, while Orderly appears competitive on sampled small-order execution quality.
 
@@ -24,7 +24,7 @@ The goal is to evaluate where each venue appears stronger from available public 
 
 - Historical snapshot date: **2026-06-01**
 - Volume and funding window: trailing 14 days ending on **2026-06-01**
-- Spread sample: 1-minute top-of-book snapshots from **2026-06-01 11:49 UTC** to **2026-06-04 11:49 UTC**
+- Spread sample: 1-minute top-of-book snapshots from **2026-06-01 12:17 UTC** to **2026-06-04 12:17 UTC**
 
 Volume and funding use historical API data. Spread uses a live sampled top-of-book window because comparable historical best bid/ask snapshots were not available through the same public data path.
 
@@ -104,4 +104,4 @@ requirements.txt          Python dependencies
 
 ## Analytical Limitation
 
-This case directly measures volume, funding, and sampled top-of-book spread. It does not measure full order-book depth or simulated price impact for larger orders. A deeper liquidity assessment would require historical order-book depth and slippage analysis for representative taker sizes.
+This case directly measures volume, funding, and sampled top-of-book spread. It does not measure full order-book depth or simulated price impact for larger orders because the processed spread dataset contains best bid/ask observations rather than full order-book levels. A deeper liquidity assessment would require historical order-book depth and slippage analysis for representative taker sizes.
