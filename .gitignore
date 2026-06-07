@@ -10,3 +10,6 @@ data/raw/spread_sampler*.out
 data/raw/spread_sampler*.err
 data/raw/spread_sampler.pid
 com.codex.*.plist
+report/submission/
+scripts/build_conclusion_documents.py
+scripts/build_one_page_conclusion.py
